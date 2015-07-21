@@ -1,13 +1,22 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/* 
+ * Copyright 2015 Felipe Santos <fralph at ic.uff.br>.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package br.uff.labtempo.tlauncher.testsuite;
 
 import br.uff.labtempo.omcp.client.OmcpClient;
 import br.uff.labtempo.omcp.service.OmcpService;
-import br.uff.labtempo.osiris.to.virtualsensornet.ValueVsnTo;
 import br.uff.labtempo.osiris.to.virtualsensornet.VirtualSensorVsnTo;
 import br.uff.labtempo.tlauncher.data.CollectorDataBuilder;
 import br.uff.labtempo.tlauncher.data.DataBase;
@@ -28,19 +37,22 @@ import java.io.IOException;
  *
  * @author Felipe Santos <live.proto at hotmail.com>
  */
-public class LatencyTestSuite implements UpdateListener<VirtualSensorVsnTo> {
+public class LatencyTestSuite implements UpdateListener<VirtualSensorVsnTo> , TestSuite{
 
     private String testName;
     private String sensorId;
     private final Object monitor = new Object();
     private boolean waiting;
     private FilePrinter printer;
+    private final int testLoop;
 
     public LatencyTestSuite() {
         this.testName = "latency";
         this.sensorId = "1";
+        this.testLoop = 100;
     }
 
+    @Override
     public void start() {
         //folder and file
         FileManager fileManager = new FileManager();
@@ -72,12 +84,11 @@ public class LatencyTestSuite implements UpdateListener<VirtualSensorVsnTo> {
             System.out.println("Iniciando service");
             wrapper.start();
             System.out.println("Enviando dados");
-            for (int i = 1; i <= 100; i++) {
+            for (int i = 1; i <= testLoop; i++) {
                 collectorDataBuilder.publishSample(sensorId, i);
                 waiting = true;
-                System.out.print(".");
-                while (waiting) {
-                    synchronized (monitor) {
+                synchronized (monitor) {
+                    while (waiting) {
                         monitor.wait();
                     }
                 }

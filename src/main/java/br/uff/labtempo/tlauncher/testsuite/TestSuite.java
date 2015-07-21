@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package br.uff.labtempo.tlauncher.data;
-
+package br.uff.labtempo.tlauncher.testsuite;
 
 /**
  *
  * @author Felipe Santos <fralph at ic.uff.br>
  */
-public interface UpdateListener<T>{
-    public void updateReceived(T object, long unpackingTimestamp);
+public interface TestSuite {
+
+    void start();
+    
 }
