@@ -51,14 +51,28 @@ public class FlowRateTestSuite implements UpdateListener<VirtualSensorVsnTo>, Te
     private final long delayLimitInSeconds;
     private long lastDelayInSeconds;
     private final int testLoop;
+    private boolean silent;
+    private boolean verbose;
+    private final int delayBetweenTestsInSeconds;
 
-    public FlowRateTestSuite() {
+    public FlowRateTestSuite(boolean silent, boolean verbose) {
         this.testName = "flow-rate";
         this.sensorId = "1";
         this.totalMessagesToSend = 10;
         this.multiplier = 10;
         this.delayLimitInSeconds = 2;
-        this.testLoop = 2;
+        this.testLoop = 100;
+        this.delayBetweenTestsInSeconds = 6;
+        this.silent = silent;
+        this.verbose = verbose;
+    }
+
+    public FlowRateTestSuite() {
+        this(false, false);
+    }
+
+    public FlowRateTestSuite(boolean verbose) {
+        this(true, verbose);
     }
 
     @Override
@@ -67,11 +81,22 @@ public class FlowRateTestSuite implements UpdateListener<VirtualSensorVsnTo>, Te
         FileManager fileManager = new FileManager();
         //commands
         ConsoleCommand command = new ConsoleCommand("sudo service rabbitmq-server restart");
-        ModuleManager manager = new ModuleManager("target\\VirtualSensorNet\\VirtualSensorNet.jar silent");
+        ModuleManager manager;
+        if (silent) {
+            manager = new ModuleManager("target\\VirtualSensorNet\\VirtualSensorNet.jar silent");
+        } else {
+            manager = new ModuleManager("target\\VirtualSensorNet\\VirtualSensorNet.jar");
+        }
 
         ConnectionFactory factory = manager.getConfig();
         OmcpClient client = factory.getClient();
-        OmcpService service = factory.getSilentService();
+        OmcpService service;
+
+        if (silent) {
+            service = factory.getSilentService();
+        } else {
+            service = factory.getService();
+        }
 
         VirtualSensorNetDataBuilder vsnDataBuilder = new VirtualSensorNetDataBuilder(client);
         CollectorDataBuilder collectorDataBuilder = new CollectorDataBuilder(client, testName);
@@ -82,7 +107,7 @@ public class FlowRateTestSuite implements UpdateListener<VirtualSensorVsnTo>, Te
             //create folder
             File mainFolder = fileManager.createFolder(DataBase.RESULT_FOLDER);
             String folderName = fileManager.getTimestampedFileName(testName);
-            File testFolder = fileManager.createFolder(mainFolder, folderName);
+            File testFolder = fileManager.createFolder(mainFolder, folderName, true);
 
             //commands
             //command.execute();
@@ -101,6 +126,9 @@ public class FlowRateTestSuite implements UpdateListener<VirtualSensorVsnTo>, Te
                 for (int i = 1; i <= testLoop; i++) {
                     printer = fileManager.getFilePrinter(totalMessagesToSend + "_" + String.format("%03d", i) + ".txt", folder, true);
                     printer.println(VirtualSensorPrintFormat.getHeaders());
+                    if (verbose) {
+                        System.out.print(totalMessagesToSend + "(x" + i + "): ");
+                    }
 
                     //quantidade de mensagens enviadas
                     for (int j = 1; j <= totalMessagesToSend; j++) {
@@ -111,15 +139,18 @@ public class FlowRateTestSuite implements UpdateListener<VirtualSensorVsnTo>, Te
                     synchronized (monitor) {
                         while (waiting) {
                             monitor.wait();
-                        }                        
+                            if (verbose) {
+                                System.out.println("ok");
+                            }
+                            Thread.sleep(delayBetweenTestsInSeconds * 1000);
+                        }
                     }
-                    
+
                 }
                 totalMessagesToSend *= multiplier;
             }
-
         } catch (Exception ex) {
-
+            Logger.getLogger(FlowRateTestSuite.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 wrapper.close();

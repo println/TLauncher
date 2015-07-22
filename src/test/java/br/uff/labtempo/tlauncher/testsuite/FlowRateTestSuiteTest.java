@@ -29,7 +29,7 @@ public class FlowRateTestSuiteTest {
 
     @Test
     public void testSomeMethod() {
-        TestSuite testSuite = new FlowRateTestSuite();
+        TestSuite testSuite = new FlowRateTestSuite(true);
         testSuite.start();
     }
 

@@ -19,6 +19,9 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -39,12 +42,24 @@ public class FileManager {
         File folder = createFolder(root, address);
         return folder;
     }
-
     public File createFolder(File file, String address) {
+        return createFolder(file, address, false);
+    }
+
+    public File createFolder(File file, String address, boolean deleteOlder) {
         File folder = new File(file, address);
         if (!folder.exists()) {
             if (!folder.mkdir()) {
                 return null;
+            }
+        }else{
+            if(deleteOlder){
+                try {
+                    FileUtils.deleteDirectory(folder);
+                    createFolder(file, address);
+                } catch (IOException ex) {
+                    Logger.getLogger(FileManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
         return folder;

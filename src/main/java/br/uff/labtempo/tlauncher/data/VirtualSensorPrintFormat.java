@@ -36,13 +36,13 @@ public class VirtualSensorPrintFormat {
         ValueVsnTo valueVsnTo = virtualSensorVsnTo.getValuesTo().get(0);
         this.id = valueVsnTo.getValue();
 
-        long t1 = virtualSensorVsnTo.getCreationTimestampInMillis();
+        long t1 = virtualSensorVsnTo.getAcquisitionTimestampInMillis();
         long t2 = virtualSensorVsnTo.getStorageTimestampInMillis();
         long t3 = unpackingTimestamp;
 
         this.endToEndInMillis = (t3 - t1);
 
-        this.tuple = id + "\t" + t1 + "\t" + t2 + "\t" + t3 + "\t" + (t2 - t1) + "\t" + endToEndInMillis;
+        this.tuple = id + "\t" + t1 + "\t" + t2 + "\t" + t3 + "\t" + (t2 - t1) + "\t" + endToEndInMillis + "\t" + (t3 - t2);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class VirtualSensorPrintFormat {
     }
 
     public static String getHeaders() {
-        String header = "ID\tSent(ms)\tStored(ms)\tReceived(ms)\tStoringLatency(ms)\tEndToEndLatency(ms)";
+        String header = "ID\tSent(ms)\tStored(ms)\tReceived(ms)\tStoringLatency(ms)\tEndToEndLatency(ms)\tStoringToEndLatency(ms)";
         return header;
     }
 

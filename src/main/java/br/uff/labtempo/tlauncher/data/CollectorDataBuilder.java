@@ -32,6 +32,7 @@ public class CollectorDataBuilder {
     private OmcpClient client;
     private final NetworkCoTo networkCoTo;
     private final CollectorCoTo collectorCoTo;
+    private long timestamp; 
 
     public CollectorDataBuilder(OmcpClient client, String collectorId) {
         this.client = client;
@@ -56,7 +57,7 @@ public class CollectorDataBuilder {
     }
 
     private SensorCoTo getSensor(String sensorId, int messageId) {
-        SensorCoTo sensorTo = new SensorCoTo(sensorId);
+        SensorCoTo sensorTo = new SensorCoTo(sensorId, ++timestamp);
         sensorTo.addValue(DataBase.DATA_NAME, messageId, DataBase.DATA_UNIT, DataBase.DATA_SYMBOL);
         return sensorTo;
     }

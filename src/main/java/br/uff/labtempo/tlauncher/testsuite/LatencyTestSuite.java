@@ -32,12 +32,14 @@ import br.uff.labtempo.tlauncher.persistence.FileManager;
 import br.uff.labtempo.tlauncher.persistence.FilePrinter;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Felipe Santos <live.proto at hotmail.com>
  */
-public class LatencyTestSuite implements UpdateListener<VirtualSensorVsnTo> , TestSuite{
+public class LatencyTestSuite implements UpdateListener<VirtualSensorVsnTo>, TestSuite {
 
     private String testName;
     private String sensorId;
@@ -58,11 +60,11 @@ public class LatencyTestSuite implements UpdateListener<VirtualSensorVsnTo> , Te
         FileManager fileManager = new FileManager();
         //commands
         ConsoleCommand command = new ConsoleCommand("sudo service rabbitmq-server restart");
-        ModuleManager manager = new ModuleManager("target\\VirtualSensorNet\\VirtualSensorNet.jar");
+        ModuleManager manager = new ModuleManager("target\\VirtualSensorNet\\VirtualSensorNet.jar silent");
 
         ConnectionFactory factory = manager.getConfig();
         OmcpClient client = factory.getClient();
-        OmcpService service = factory.getService();
+        OmcpService service = factory.getSilentService();
 
         VirtualSensorNetDataBuilder vsnDataBuilder = new VirtualSensorNetDataBuilder(client);
         CollectorDataBuilder collectorDataBuilder = new CollectorDataBuilder(client, testName);
@@ -73,7 +75,7 @@ public class LatencyTestSuite implements UpdateListener<VirtualSensorVsnTo> , Te
             //create folder
             File mainFolder = fileManager.createFolder(DataBase.RESULT_FOLDER);
             String folderName = fileManager.getTimestampedFileName(testName);
-            File folder = fileManager.createFolder(mainFolder, folderName);
+            File folder = fileManager.createFolder(mainFolder, folderName, true);
             printer = fileManager.getFilePrinter(testName + ".txt", folder, true);
             printer.println(VirtualSensorPrintFormat.getHeaders());
             //commands
@@ -93,9 +95,10 @@ public class LatencyTestSuite implements UpdateListener<VirtualSensorVsnTo> , Te
                     }
                 }
             }
+            printer.close();
 
         } catch (Exception ex) {
-
+            Logger.getLogger(LatencyTestSuite.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 wrapper.close();
