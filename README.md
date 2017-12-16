@@ -5,5 +5,5 @@ A Console Test Suite to OSIRIS Framework!
 - Java 7
 - Maven
 - jUnit
-- OSIRIS FRAMEWORK TOOL
+- [OSIRIS Framework](https://github.com/labtempo/osiris)'s tool
 - Concurrency
